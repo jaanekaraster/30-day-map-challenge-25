@@ -1,5 +1,3 @@
-# 30-day-map-challenge-25
-
 <!-- ![header image](https://jaanekaraster.github.io/30-day-map-challenge-24/all_2024.png) -->
 
 # 30 Day Map Challenge 2025
@@ -75,6 +73,6 @@ There are so many ways to make maps! Methodologies below.
 
 Description
 
-Data from [ACLED](https://acleddata.com/).
+Data from [Source](https://github.com/jaanekaraster).
 
 Explore the map at my own Github Pages site [here.](https://jaanekaraster.github.io/30-day-map-challenge-24/day1_points/day1_points.html)
