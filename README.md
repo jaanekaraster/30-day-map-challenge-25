@@ -13,7 +13,7 @@ There are so many ways to make maps! Methodologies below.
 
 | Day  | Theme     | Description             | Topic |
 |------|------------|-------------------|-----------|
-| 1    | 📍 **Points**   | Challenge Classic: Map with point data (e.g., individual locations, points of interest, clusters). Focus on effective symbolization and density visualization.         | [Title]() |
+| 1    | 📍 **Points**   | Challenge Classic: Map with point data (e.g., individual locations, points of interest, clusters). Focus on effective symbolization and density visualization.         | [Historic Forts]() |
 | 2    | **Lines**   | Challenge Classic: Map linear features (e.g., roads, rivers, migration paths, flow lines). Explore line thickness, color, and direction to convey information.        | [Title]() |
 | 3    | **Polygons**   | Challenge Classic: Create a map focused on area features (e.g., administrative regions, land use, boundaries). Use fills, patterns, and choropleth techniques.        | [Title]() |
 | 4    | **My Data**   | Map something personal using your own dataset. Visualize GPS traces, your commute, or a unique, small dataset you created. (Need simple data? Try geojson.io)        | [Title]() |
@@ -38,7 +38,7 @@ There are so many ways to make maps! Methodologies below.
 | 23    | **Process**   | Show how you make a map. This could be a tutorial, a step-by-step graphic, a blog post, a video, or a screenshot of your work environment. Combine it with a map from another day!       | [Title]() |
 | 24    | **Places And Their Names**   | Focus on toponymy (place names). Experiment with font choices, label placement, typography, multiple languages, or the history and meaning behind a name.        | [Title]() |
 | 25    | **Hexagons**   | Challenge Classic: Use hexagonal binning (hexbins) or a hexagonal grid system to visualize your data. Celebrate this beautiful and efficient tessellation!        | [Title]() |
-| 26    | **Transport**   | (World Sustainable Transport Day) Map mobility, traffic flow, public transit networks, logistics chains, or advocate for sustainable transport options.        | [Title]() |
+| 26    | **Transport**   | (World Sustainable Transport Day) Map mobility, traffic flow, public transit networks, logistics chains, or advocate for sustainable transport options.        | Collaborative transit map |
 | 27    | **Boundaries**   | Map lines of division—political, physical, ecological, or conceptual. Explore the meaning and impact of a dividing line, real or perceived.        | [Title]() |
 | 28    | **Black**   | (Black Friday) Interpret the theme of Black. The map can be purely monochromatic, represent absence/darkness (e.g., light pollution), or relate to themes of consumption.        | [Title]() |
 | 29    | **Raster**   | Challenge Classic: Map using raster data. Focus on satellite imagery, elevation models (DEMs), land cover, or pixel-based art.        | [Title]() |
@@ -60,19 +60,3 @@ There are so many ways to make maps! Methodologies below.
   }
 </style>
 
-## Day 1: Points
-**Title**
-
-<div class="responsive-video">
-  <video controls loop muted autoplay>
-    <source src="https://github.com/jaanekaraster/30-day-map-challenge-25/" 
-    type="video/mp4"> 
-    Your browser does not support the video tag.
-  </video>
-</div>
-
-Description
-
-Data from [Source](https://github.com/jaanekaraster).
-
-Explore the map at my own Github Pages site [here.](https://jaanekaraster.github.io/30-day-map-challenge-24/day1_points/day1_points.html)
