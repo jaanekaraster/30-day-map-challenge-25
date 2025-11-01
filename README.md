@@ -13,7 +13,7 @@ There are so many ways to make maps! Methodologies below.
 
 | Day  | Theme     | Description             | Topic |
 |------|------------|-------------------|-----------|
-| 1    | 📍 **Points**   | Challenge Classic: Map with point data (e.g., individual locations, points of interest, clusters). Focus on effective symbolization and density visualization.         | [Historic Forts]() |
+| 1    | 📍 **Points**   | Challenge Classic: Map with point data (e.g., individual locations, points of interest, clusters). Focus on effective symbolization and density visualization.         | [Historic Forts](https://jaanekaraster.github.io/30-day-map-challenge-25/day01_points/map.html) |
 | 2    | **Lines**   | Challenge Classic: Map linear features (e.g., roads, rivers, migration paths, flow lines). Explore line thickness, color, and direction to convey information.        | [Title]() |
 | 3    | **Polygons**   | Challenge Classic: Create a map focused on area features (e.g., administrative regions, land use, boundaries). Use fills, patterns, and choropleth techniques.        | [Title]() |
 | 4    | **My Data**   | Map something personal using your own dataset. Visualize GPS traces, your commute, or a unique, small dataset you created. (Need simple data? Try geojson.io)        | [Title]() |
