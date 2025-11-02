@@ -1,8 +1,3 @@
----
-layout: default
-title: Home
----
-
 <!-- ![header image](https://jaanekaraster.github.io/30-day-map-challenge-24/all_2024.png) -->
 
 # 30 Day Map Challenge 2025
