@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>3D Route Tour</title>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+<style>
+  html, body, #cesiumContainer {
+    width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+  }
+
+  /* UI Controls */
+  #controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    background: white;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="cesiumContainer"></div>
+
+<!-- UI buttons -->
+<div id="controls">
+  <button id="playBtn" class="btn">▶ Play</button>
+  <button id="pauseBtn" class="btn">⏸ Pause</button>
+  <button id="resetBtn" class="btn">🔄 Reset</button>
+  
+</div>
+
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+
+<script>
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzYmM4MzdmZC01YWI2LTQ3OGQtOTk2ZS0xYWQ1YWM5ZTdkZTYiLCJpZCI6MzU3MDQyLCJpYXQiOjE3NjIyNzMzODF9.co1zVlsje0Fc0HaBAGCXCzJ5DGk8XFBHG07C4VxKIps";
+
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  terrain: Cesium.Terrain.fromWorldTerrain(),
+  baseLayerPicker: true,
+  timeline: false,
+  animation: false,
+});
+
+// Required for animation
+viewer.clock.shouldAnimate = false;
+viewer.clock.multiplier = 1;
+viewer.clock.startTime = Cesium.JulianDate.now();
+viewer.clock.currentTime = viewer.clock.startTime;
+
+// Load GeoJSON overlay (Polyline)
+Cesium.GeoJsonDataSource.load("data/combined_clean.geojson", {
+  clampToGround: true
+}).then(function (ds) {
+  viewer.dataSources.add(ds);
+
+  const entities = ds.entities.values;
+  for (let i = 0; i < entities.length; i++) {
+    const e = entities[i];
+    if (e.polyline) {
+      e.polyline.width = 5;
+      e.polyline.material = Cesium.Color.RED.withAlpha(0.9);
+      e.polyline.clampToGround = true;
+    }
+  }
+});
+
+// ---- Flight animation path ---- //
+let animationActive = false;
+let t = 0;
+let maxT = 0;
+let spline;
+
+// Load the cesium_path.json animation points
+fetch("data/cesium_path.json")
+  .then(r => r.json())
+  .then(path => {
+
+    const positions = path.map(p =>
+      Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.height)
+    );
+
+    spline = new Cesium.CatmullRomSpline({
+      times: positions.map((_, i) => i * 0.2),
+      points: positions,
+    });
+
+    maxT = (positions.length - 1) * 0.2;
+  });
+
+function tick() {
+  if (!animationActive || !spline) return;
+
+  const p = spline.evaluate(t);
+  viewer.camera.lookAt(p, new Cesium.Cartesian3(0, 0, 80));
+
+  t += 0.03;
+  if (t >= maxT) {
+    animationActive = false;
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  }
+}
+
+viewer.clock.onTick.addEventListener(tick);
+
+// ---- UI Controls ---- //
+document.getElementById("playBtn").onclick = () => {
+  animationActive = true;
+  viewer.clock.shouldAnimate = true;
+};
+
+document.getElementById("pauseBtn").onclick = () => {
+  animationActive = false;
+  viewer.clock.shouldAnimate = false;
+};
+
+document.getElementById("resetBtn").onclick = () => {
+  t = 0;
+  animationActive = false;
+  viewer.clock.shouldAnimate = false;
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+};
+</script>
+
+</body>
+</html>
