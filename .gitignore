@@ -5,3 +5,4 @@ narrative.md
 utils/
 keys/
 buildings.geojson
+auth.py
