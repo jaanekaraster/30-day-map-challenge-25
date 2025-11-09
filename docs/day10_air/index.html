@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Flight of the Rosefinch</title>
+<link href="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  body { margin: 0; padding: 0; }
+  #map { width: 100vw; height: 100vh; }
+  #timestamp {
+    position: absolute;
+    bottom: 20px;          /* place at bottom */
+    left: 50%;             /* center horizontally */
+    transform: translateX(-50%); /* true centering */
+    padding: 8px 14px;
+    background: #E9021F;
+    color: white;
+    font-family: Arial;
+    font-size: 14px;
+    border-radius: 6px;
+    z-index: 10;
+}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="timestamp"></div>
+<h2 style="position:absolute; z-index:9999; left:20px; top:0px;
+    font-family:Arial; background:rgba(255,255,255,0.85); padding:8px; max-width: 300px;
+    border-radius:6px;">
+    Flight of the Rosefinch
+    <br>
+    <span style="font-size:14px; font-weight:normal; line-height:1.1; display:block; margin-top: 10px;">
+    Seasonal migrations of the Common Rosefinch <span style="font-style: italic">(Carpodacus erythrinus)</span>, 2011–2016
+    </span>
+
+</h2>
+<span style="position:absolute; z-index:9999; left:20px; bottom:10px; font-family:Arial; 
+background:rgba(255,255,255,0.85); padding:8px; max-width: 400px;border-radius: 6px; font-size: 10px; margin-bottom: 10px;">
+<span style="font-size: 12px;">By @jaanekaraster for 30 Day Map Challenge 2025, Day 10: Air</span>
+<br>
+<span>Source: <a href="https://datarepository.movebank.org/entities/datapackage/7cf55ae8-94f6-4c87-a98b-af98366682b8" style="color:red">Movebank.org</a>: Lisovski S, Neumann R, Albrecht T, Munclinger P, Ahola MP, Bauer S, Cepak J, Fransson T, Jakobsson S, Jaakkonen T, Metzger B, Piha M, Shurulinkov P, Stach R, Ström K, Velmala W, Briedis M. 2021. Data from: The Indo-European Flyway: opportunities and constraints reflected by common rosefinches breeding across Europe. Movebank Data Repository. <a href="https://doi.org/10.5441/001/1.034jj41h" style="color:red">DOI</a></span>
+</span>"
+<div id="legend" style="
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 9999;
+  background: rgb(255, 255, 255);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  color: rgb(0, 0, 0);
+  font-size: 12px;
+">
+  <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">
+    Month
+  </div>
+
+  <div style="
+    width: 180px;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(
+      to right,
+      rgb(0,190,255),        /* January – light blue */
+      rgb(204, 88, 162),      /* April – transition */
+      rgb(233,2,31),       /* July – hot pink */
+      rgb(204, 88, 162),      /* October – transition */
+      rgb(0,190,255)         /* December – light blue */
+    );
+    margin-bottom: 4px;
+  "></div>
+
+  <div style="display:flex; justify-content:space-between;">
+      <span>Jan</span><span>Apr</span><span>Jul</span><span>Oct</span><span>Dec</span>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.js"></script>
+<script>
+
+// ──────────────────────────────────────────────
+// COLOR FUNCTION: month -> between light-blue & hot-pink
+// Jan (1)   → light blue   (0, 190, 255)
+// Jul (7)   → hot pink     (255, 30, 160)
+// Mapping is continuous. Values smoothly interpolate.
+// ──────────────────────────────────────────────
+function monthToColor(month) {
+  // Normalize month to 0..1 where midpoint (0.5) = July
+  const t = Math.abs(month - 7) / 6;  // July is center
+
+  // interpolate between HOT-PINK (center) and LIGHT-BLUE (edges)
+  const hotPink =  [255, 28, 57];
+  const lightBlue = [0, 190, 255];
+
+  const r = lightBlue[0] + (hotPink[0] - lightBlue[0]) * (1 - t);
+  const g = lightBlue[1] + (hotPink[1] - lightBlue[1]) * (1 - t);
+  const b = lightBlue[2] + (hotPink[2] - lightBlue[2]) * (1 - t);
+
+  return `rgb(${r|0},${g|0},${b|0})`;
+}
+
+fetch("rosefinch-tracks.csv")
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.trim().split("\n");
+    const headers = rows[0].split(",");
+
+    const idxLng = headers.indexOf("location-long");
+    const idxLat = headers.indexOf("location-lat");
+    const idxTimestamp = headers.indexOf("timestamp");
+    const idxId = headers.indexOf("individual-local-identifier");
+
+    // Parse rows
+    let points = rows.slice(1).map(row => {
+      const cols = row.split(",");
+      const ts = new Date(cols[idxTimestamp].trim());
+
+      return {
+        id: cols[idxId].trim(),
+        lng: parseFloat(cols[idxLng]),
+        lat: parseFloat(cols[idxLat]),
+        timestamp: ts,
+        month: ts.getUTCMonth() + 1
+      };
+    }).filter(p =>
+      !isNaN(p.lng) && !isNaN(p.lat) && !isNaN(p.timestamp)
+    );
+
+    // Sort globally by time
+    points.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Group by individual
+    const individuals = {};
+    points.forEach(p => {
+      if (!individuals[p.id]) individuals[p.id] = [];
+      individuals[p.id].push(p);
+    });
+
+    // Build empty GeoJSON collection for individual segments
+    const geojson = {
+      type: "FeatureCollection",
+      features: []
+    };
+
+    initMap(geojson, individuals, points);
+  });
+
+function initMap(geojson, individuals, sortedPoints) {
+  const map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    center: [44.793, 42.315],   // Georgia (Caucasus, between migration routes)
+    zoom: 3,
+    pitch: 0,
+    bearing: 0
+  });
+
+  map.on("load", () => {
+    map.addSource("migration", {
+      type: "geojson",
+      data: geojson
+    });
+
+    map.addLayer({
+      id: "migration-line",
+      type: "line",
+      source: "migration",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-width": 2,
+        "line-opacity": 0.9,
+        "line-color": ["get", "color"]   // segment-specific color
+      }
+    });
+
+    animateTracks(geojson, individuals, sortedPoints, map);
+  });
+}
+
+function animateTracks(geojson, individuals, sortedPoints, map) {
+  let index = 0;
+  const timestampDiv = document.getElementById("timestamp");
+
+  // Track last point seen for each individual
+  const lastPoint = {};
+
+  function addNextSegment() {
+    if (index >= sortedPoints.length) return;
+
+    const p = sortedPoints[index];
+    const prev = lastPoint[p.id];
+
+    if (prev) {
+      // add segment ONLY within same individual track
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          id: p.id,
+          color: monthToColor(prev.month) // color based on previous month
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [prev.lng, prev.lat],
+            [p.lng, p.lat]
+          ]
+        }
+      });
+    }
+
+    // update last known point for this individual
+    lastPoint[p.id] = p;
+
+    timestampDiv.innerText = p.timestamp.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+    });
+    map.getSource("migration").setData(geojson);
+
+    index++;
+    // requestAnimationFrame(addNextSegment);
+    setTimeout(addNextSegment, 50);  
+  }
+
+  addNextSegment();
+}
+
+</script>
+
+</body>
+</html>
