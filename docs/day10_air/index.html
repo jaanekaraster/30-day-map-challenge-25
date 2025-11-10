@@ -7,41 +7,72 @@
 <style>
   body { margin: 0; padding: 0; }
   #map { width: 100vw; height: 100vh; }
-  #timestamp {
-    position: absolute;
-    bottom: 20px;          /* place at bottom */
-    left: 50%;             /* center horizontally */
-    transform: translateX(-50%); /* true centering */
-    padding: 8px 14px;
-    background: #E9021F;
-    color: white;
-    font-family: Arial;
-    font-size: 14px;
-    border-radius: 6px;
-    z-index: 10;
-}
+
+
+
 </style>
 </head>
 <body>
 
 <div id="map"></div>
-<div id="timestamp"></div>
-<h2 style="position:absolute; z-index:9999; left:20px; top:0px;
-    font-family:Arial; background:rgba(255,255,255,0.85); padding:8px; max-width: 300px;
-    border-radius:6px;">
-    Flight of the Rosefinch
-    <br>
-    <span style="font-size:14px; font-weight:normal; line-height:1.1; display:block; margin-top: 10px;">
-    Seasonal migrations of the Common Rosefinch <span style="font-style: italic">(Carpodacus erythrinus)</span>, 2011–2016
-    </span>
+<div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); 
+            display:flex; gap:10px; align-items:center; z-index:9999;">
 
-</h2>
+    <div id="timestamp" style="
+        padding: 8px 14px;
+        background: #E9021F;
+        color: white;
+        font-family: Arial;
+        font-size: 14px;
+        border-radius: 6px;
+    "></div>
+
+    <button id="playPauseBtn" style="
+        background: rgba(255, 255, 255, 0.85);
+        border: none;
+        padding: 4px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: Arial;
+    ">⏸ Pause</button>
+
+</div>
+<div style="position:absolute; z-index:9999; left:20px; top: 20px;; 
+            font-family:Arial; background:rgba(255,255,255,0.85); 
+            padding:8px; max-width: 450px; max-height: 100px; border-radius:6px; display:flex; gap:10px; align-items:flex-start;">
+
+    <div id="rosefinch-image" style="flex-shrink:0;">
+        <img src="https://cdn.download.ams.birds.cornell.edu/api/v1/asset/169288651/2400" 
+             alt="Rosefinch image, courtesy eBird, Will Morris" 
+             style="width:120px; height:100%; border-radius:4px;">
+    </div>
+
+    <div style="flex:1;">
+        <h2 style="margin:0; font-size:22px;">
+            Flight of the Rosefinch
+        </h2>
+
+        <span style="font-size:14px; font-weight:normal; line-height:1.2; display:block; margin-top: 6px;">
+            Seasonal migrations of the Common Rosefinch 
+            <span style="font-style: italic;">(Carpodacus erythrinus)</span>, 2011–2016
+        </span>
+        <span style="font-size:14px; font-weight:normal; line-height: 0.9;">
+            <a href="https://ebird.org/species/comros" style="color:red;">Learn more and hear its song at eBird</a>
+        </span>
+    </div>
+</div>
 <span style="position:absolute; z-index:9999; left:20px; bottom:10px; font-family:Arial; 
 background:rgba(255,255,255,0.85); padding:8px; max-width: 400px;border-radius: 6px; font-size: 10px; margin-bottom: 10px;">
 <span style="font-size: 12px;">By @jaanekaraster for 30 Day Map Challenge 2025, Day 10: Air</span>
-<br>
+<br>    
 <span>Source: <a href="https://datarepository.movebank.org/entities/datapackage/7cf55ae8-94f6-4c87-a98b-af98366682b8" style="color:red">Movebank.org</a>: Lisovski S, Neumann R, Albrecht T, Munclinger P, Ahola MP, Bauer S, Cepak J, Fransson T, Jakobsson S, Jaakkonen T, Metzger B, Piha M, Shurulinkov P, Stach R, Ström K, Velmala W, Briedis M. 2021. Data from: The Indo-European Flyway: opportunities and constraints reflected by common rosefinches breeding across Europe. Movebank Data Repository. <a href="https://doi.org/10.5441/001/1.034jj41h" style="color:red">DOI</a></span>
-</span>"
+<br>
+<span>Image Credits: Will Morris, eBird</span>    
+</span>
+
+</div>
+
 <div id="legend" style="
   position: absolute;
   right: 20px;
@@ -84,16 +115,9 @@ background:rgba(255,255,255,0.85); padding:8px; max-width: 400px;border-radius: 
 
 // ──────────────────────────────────────────────
 // COLOR FUNCTION: month -> between light-blue & hot-pink
-// Jan (1)   → light blue   (0, 190, 255)
-// Jul (7)   → hot pink     (255, 30, 160)
-// Mapping is continuous. Values smoothly interpolate.
-// ──────────────────────────────────────────────
 function monthToColor(month) {
-  // Normalize month to 0..1 where midpoint (0.5) = July
-  const t = Math.abs(month - 7) / 6;  // July is center
-
-  // interpolate between HOT-PINK (center) and LIGHT-BLUE (edges)
-  const hotPink =  [255, 28, 57];
+  const t = Math.abs(month - 7) / 6;
+  const hotPink = [255, 28, 57];
   const lightBlue = [0, 190, 255];
 
   const r = lightBlue[0] + (hotPink[0] - lightBlue[0]) * (1 - t);
@@ -103,6 +127,8 @@ function monthToColor(month) {
   return `rgb(${r|0},${g|0},${b|0})`;
 }
 
+// ──────────────────────────────────────────────
+// LOAD DATA
 fetch("rosefinch-tracks.csv")
   .then(res => res.text())
   .then(text => {
@@ -114,11 +140,9 @@ fetch("rosefinch-tracks.csv")
     const idxTimestamp = headers.indexOf("timestamp");
     const idxId = headers.indexOf("individual-local-identifier");
 
-    // Parse rows
     let points = rows.slice(1).map(row => {
       const cols = row.split(",");
       const ts = new Date(cols[idxTimestamp].trim());
-
       return {
         id: cols[idxId].trim(),
         lng: parseFloat(cols[idxLng]),
@@ -126,108 +150,170 @@ fetch("rosefinch-tracks.csv")
         timestamp: ts,
         month: ts.getUTCMonth() + 1
       };
-    }).filter(p =>
-      !isNaN(p.lng) && !isNaN(p.lat) && !isNaN(p.timestamp)
-    );
+    }).filter(p => !isNaN(p.lng) && !isNaN(p.lat) && !isNaN(p.timestamp));
 
-    // Sort globally by time
-    points.sort((a, b) => a.timestamp - b.timestamp);
+    points.sort((a,b) => a.timestamp - b.timestamp);
 
-    // Group by individual
     const individuals = {};
     points.forEach(p => {
       if (!individuals[p.id]) individuals[p.id] = [];
       individuals[p.id].push(p);
     });
 
-    // Build empty GeoJSON collection for individual segments
-    const geojson = {
-      type: "FeatureCollection",
-      features: []
-    };
+    const geojson = { type: "FeatureCollection", features: [] };
 
-    initMap(geojson, individuals, points);
+    initMap(geojson, individuals);
   });
 
-function initMap(geojson, individuals, sortedPoints) {
+// ──────────────────────────────────────────────
+// INITIALIZE MAP
+function initMap(geojson, individuals) {
   const map = new maplibregl.Map({
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-    center: [44.793, 42.315],   // Georgia (Caucasus, between migration routes)
-    zoom: 3,
-    pitch: 0,
-    bearing: 0
+    center: [45.683399, 46.051501],
+    zoom: 2.8
   });
 
   map.on("load", () => {
-    map.addSource("migration", {
-      type: "geojson",
-      data: geojson
-    });
-
+    // Normal migration lines for current bird
+    map.addSource("migration", { type: "geojson", data: geojson });
     map.addLayer({
       id: "migration-line",
       type: "line",
       source: "migration",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-width": 2,
-        "line-opacity": 0.9,
-        "line-color": ["get", "color"]   // segment-specific color
-      }
+      paint: { "line-width": 2, "line-opacity": 0.9, "line-color": ["get","color"] }
     });
 
-    animateTracks(geojson, individuals, sortedPoints, map);
+    // Glow around current bird path
+    map.addSource("activeSegment", { type: "geojson", data: { type:"FeatureCollection", features:[] } });
+    map.addLayer({
+      id: "activeSegment-glow",
+      type: "line",
+      source: "activeSegment",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-width": 8, "line-color": "white", "line-blur":5, "line-opacity":0.3 }
+    });
+
+    // Current bird point
+    map.addSource("activePoint", { type: "geojson", data: { type:"FeatureCollection", features:[] } });
+    map.addLayer({
+      id: "activePoint-circle",
+      type: "circle",
+      source: "activePoint",
+      paint: { "circle-radius":5, "circle-color":"red","circle-stroke-width":1.5,"circle-stroke-color":"white" }
+    });
+
+    // Completed birds (faded, lines only)
+    map.addSource("completedBirds", { type: "geojson", data: { type:"FeatureCollection", features:[] } });
+    map.addLayer({
+      id: "completed-lines",
+      type: "line",
+      source: "completedBirds",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-width": 2, "line-opacity": 0.3, "line-color": ["get","color"] }
+    });
+
+    animateTracksSingleIndividual(geojson, individuals, map);
   });
 }
 
-function animateTracks(geojson, individuals, sortedPoints, map) {
-  let index = 0;
+// ──────────────────────────────────────────────
+// ANIMATE ONE BIRD AT A TIME, FADED TRAILS FOR COMPLETED
+function animateTracksSingleIndividual(geojson, individuals, map) {
   const timestampDiv = document.getElementById("timestamp");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  let isPaused = false;
 
-  // Track last point seen for each individual
-  const lastPoint = {};
+  const individualIds = Object.keys(individuals);
+  let currentIndividualIndex = 0;
 
-  function addNextSegment() {
-    if (index >= sortedPoints.length) return;
+  let completedFeatures = [];
 
-    const p = sortedPoints[index];
-    const prev = lastPoint[p.id];
+  playPauseBtn.addEventListener("click", () => {
+    isPaused = !isPaused;
+    playPauseBtn.innerText = isPaused ? "▶ Play" : "⏸ Pause";
+  });
 
-    if (prev) {
-      // add segment ONLY within same individual track
-      geojson.features.push({
-        type: "Feature",
-        properties: {
-          id: p.id,
-          color: monthToColor(prev.month) // color based on previous month
-        },
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [prev.lng, prev.lat],
-            [p.lng, p.lat]
-          ]
+  function animateIndividual(individualId, callback) {
+    const points = individuals[individualId];
+    if (!points || points.length === 0) return callback();
+
+    geojson.features = [];
+    const activePath = [[points[0].lng, points[0].lat]];
+
+    map.getSource("migration").setData({ type:"FeatureCollection", features:geojson.features });
+    map.getSource("activeSegment").setData({ type:"FeatureCollection", features:[{type:"Feature", geometry:{type:"LineString", coordinates:activePath}}] });
+    map.getSource("activePoint").setData({ type:"FeatureCollection", features:[{type:"Feature", geometry:{type:"Point", coordinates:[points[0].lng, points[0].lat]}, properties:{active:true}}] });
+    timestampDiv.innerText = points[0].timestamp.toISOString().split("T")[0];
+
+    let i = 1;
+
+    function animateSegment() {
+      if (i >= points.length) {
+        // Save segments with original color for completed faded lines
+        for (let j = 1; j < points.length; j++) {
+          completedFeatures.push({
+            type:"Feature",
+            geometry: { type:"LineString", coordinates: [[points[j-1].lng, points[j-1].lat],[points[j].lng, points[j].lat]] },
+            properties: { color: monthToColor(points[j-1].month) }
+          });
         }
-      });
+        map.getSource("completedBirds").setData({ type:"FeatureCollection", features: completedFeatures });
+        callback();
+        return;
+      }
+
+      const prev = points[i-1];
+      const next = points[i];
+      const dx = next.lng - prev.lng;
+      const dy = next.lat - prev.lat;
+      const frames = Math.max(1, Math.ceil(Math.sqrt(dx*dx + dy*dy)*1));
+      let frame = 0;
+
+      const tempSegmentFeature = {
+        type:"Feature",
+        properties:{id:individualId,color:monthToColor(prev.month)},
+        geometry:{type:"LineString", coordinates:[[prev.lng, prev.lat]]}
+      };
+      geojson.features.push(tempSegmentFeature);
+
+      function animateFrame() {
+        if (isPaused) return requestAnimationFrame(animateFrame);
+        const t = frame / frames;
+        const lng = prev.lng + (next.lng - prev.lng)*t;
+        const lat = prev.lat + (next.lat - prev.lat)*t;
+
+        tempSegmentFeature.geometry.coordinates.push([lng, lat]);
+        map.getSource("migration").setData({ type:"FeatureCollection", features:geojson.features });
+
+        activePath.push([lng, lat]);
+        map.getSource("activeSegment").setData({ type:"FeatureCollection", features:[{type:"Feature", geometry:{type:"LineString", coordinates:activePath}}] });
+
+        map.getSource("activePoint").setData({ type:"FeatureCollection", features:[{type:"Feature", geometry:{type:"Point", coordinates:[lng, lat]}, properties:{active:true}}] });
+
+        timestampDiv.innerText = next.timestamp.toISOString().split("T")[0];
+
+        frame++;
+        if (frame <= frames) requestAnimationFrame(animateFrame);
+        else { i++; animateSegment(); }
+      }
+
+      animateFrame();
     }
 
-    // update last known point for this individual
-    lastPoint[p.id] = p;
-
-    timestampDiv.innerText = p.timestamp.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-    });
-    map.getSource("migration").setData(geojson);
-
-    index++;
-    // requestAnimationFrame(addNextSegment);
-    setTimeout(addNextSegment, 50);  
+    animateSegment();
   }
 
-  addNextSegment();
+  function nextIndividual() {
+    if (currentIndividualIndex >= individualIds.length) return;
+    const individualId = individualIds[currentIndividualIndex];
+    currentIndividualIndex++;
+    animateIndividual(individualId, nextIndividual);
+  }
+
+  nextIndividual();
 }
 
 </script>
