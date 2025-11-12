@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>30DMC25 Day 12: Map from 2125</title>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/"
+      }
+    }
+    </script>
+
+    <style>
+      /* Position box in top-left corner */
+      #info-box {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        background: white;
+        color: black;
+        padding: 10px 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        font-family: system-ui, sans-serif;
+        max-width: 280px;
+      }
+
+      #info-box h1 {
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      #info-box p {
+        margin: 4px 0 0;
+        font-size: 0.85rem;
+        color: #333;
+      }
+
+      #info-box small {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.7rem;
+        color: #666;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 📦 Title box -->
+    <div id="info-box" style="max-width: 400px;">
+      <h1>2125: Terraformed Titan</h1>
+      <p>100 years of terraforming Saturn's largest moon</p>
+        <small>By @jaanekaraster for 30 Day Map Challenge, Day 12: Map from 2125</small>
+      <small>Source: <a href="https://trek.nasa.gov/tiles/Titan">NASA Titan Trek Elevation Tiles</a></small>
+    </div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
