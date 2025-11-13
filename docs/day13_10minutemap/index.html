@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Sint Maarten → Anguilla Arc Animation</title>
+<title>30DMC25: 10-Minute Map</title>
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
@@ -83,8 +83,8 @@ const map = new maplibregl.Map({
       "maxzoom": 18
     }]
   },
-  center: [-63.05, 18.15],
-  zoom: 11,
+  center: [-63.05, 18.088],
+  zoom: 12,
   projection: 'globe',
   pitch: 45,
   bearing: -20
@@ -111,7 +111,7 @@ map.on('load', async () => {
     type: 'fill',
     source: 'sxm-data',
     filter: ['in', ['get', 'name'], ['literal', ['sxm_airport', 'axa_airport']]],
-    paint: { 'fill-color': '#00FFFF', 'fill-opacity': 0.6 }
+    paint: { 'fill-color': '#DE1414FF', 'fill-opacity': 0.6 }
   });
 
   // Create curved great-circle arc
