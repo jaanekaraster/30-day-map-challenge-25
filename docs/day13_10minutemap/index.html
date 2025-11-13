@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Sint Maarten → Anguilla Arc Animation</title>
+<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  body, html { margin: 0; height: 100%; overflow: hidden; }
+  #map { width: 100%; height: 100%; }
+  #plane {
+    position: absolute;
+    font-size: 28px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  #info-box {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  max-width: 280px;
+  font-family: system-ui, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+#info-box h1 {
+  font-size: 1.1rem;
+  margin: 0 0 4px 0;
+}
+
+#info-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+#info-box small {
+  display: block;
+  margin-top: 6px;
+  color: #ccc;
+  font-size: 0.75rem;
+}
+
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="plane">✈️</div>
+<div id="info-box" style="z-index:9999;">
+    <h1>A 10-Minute Flight</h1>
+    <p>A short hop between Sint Maarten (Netherlands) and Anguilla (UK).</p>
+    <small>By @jaanekaraster for 30 Day Map Challenge, Day 13: 10-Minute Map</small>
+</div>
+
+
+<script>
+// Initialize MapLibre globe with EOX Sentinel satellite imagery
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    "version": 8,
+    "sources": {
+      "sentinel": {
+        "type": "raster",
+        "tiles": [
+          "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
+        ],
+        "tileSize": 256,
+        "attribution": "Imagery © <a href='https://eox.at/'>EOX</a> | Data: Sentinel-2"
+      }
+    },
+    "layers": [{
+      "id": "satellite",
+      "type": "raster",
+      "source": "sentinel",
+      "minzoom": 6,
+      "maxzoom": 18
+    }]
+  },
+  center: [-63.05, 18.15],
+  zoom: 11,
+  projection: 'globe',
+  pitch: 45,
+  bearing: -20
+});
+
+map.on('load', async () => {
+  const res = await fetch('sxm_axa_arc.geojson');
+  const data = await res.json();
+
+  map.addSource('sxm-data', { type: 'geojson', data });
+
+  // Borders (white)
+  map.addLayer({
+    id: 'country-borders',
+    type: 'line',
+    source: 'sxm-data',
+    filter: ['in', ['get', 'name'], ['literal', ['sxm_border', 'axa_border']]],
+    paint: { 'line-color': '#FFFFFF', 'line-width': 2 }
+  });
+
+  // Airports (cyan)
+  map.addLayer({
+    id: 'airports',
+    type: 'fill',
+    source: 'sxm-data',
+    filter: ['in', ['get', 'name'], ['literal', ['sxm_airport', 'axa_airport']]],
+    paint: { 'fill-color': '#00FFFF', 'fill-opacity': 0.6 }
+  });
+
+  // Create curved great-circle arc
+  const arcFeature = data.features.find(f => f.properties.name === 'arc');
+  const arcCoords = turf.greatCircle(
+    turf.point(arcFeature.geometry.coordinates[0]),
+    turf.point(arcFeature.geometry.coordinates[1]),
+    { npoints: 200 }
+  ).geometry.coordinates;
+
+  const partialArc = {
+    type: "FeatureCollection",
+    features: [{ type: "Feature", geometry: { type: "LineString", coordinates: [] } }]
+  };
+
+  map.addSource('arc-progress', { type: 'geojson', data: partialArc });
+  map.addLayer({
+    id: 'arc-line',
+    type: 'line',
+    source: 'arc-progress',
+    paint: { 'line-color': '#FFF200', 'line-width': 3 }
+  });
+
+  // Animate ✈️ along the arc
+  const plane = document.getElementById('plane');
+  let i = 0;
+
+  function animate() {
+    if (i >= arcCoords.length) return;
+    const segment = arcCoords.slice(0, i + 1);
+    partialArc.features[0].geometry.coordinates = segment;
+    map.getSource('arc-progress').setData(partialArc);
+
+    const [lon, lat] = arcCoords[i];
+    const pixel = map.project([lon, lat]);
+    plane.style.left = `${pixel.x}px`;
+    plane.style.top = `${pixel.y}px`;
+
+    i++;
+    setTimeout(animate, 60); // slower = smoother
+  }
+
+  animate();
+
+  // --- Add Labels ---
+  const labelFeatures = [];
+
+  // Extract airport centroids
+  data.features
+    .filter(f => ["sxm_airport", "axa_airport"].includes(f.properties.name))
+    .forEach(f => {
+      const centroid = turf.centroid(f);
+      labelFeatures.push({
+        type: "Feature",
+        properties: {
+          label: f.properties.name === "sxm_airport"
+            ? "Princess Juliana Int’l Airport"
+            : "Clayton J. Lloyd Int’l Airport",
+          color: "#00FFFF"
+        },
+        geometry: centroid.geometry
+      });
+    });
+
+  // Extract country centroids
+  data.features
+    .filter(f => ["sxm_border", "axa_border"].includes(f.properties.name))
+    .forEach(f => {
+      const centroid = turf.centroid(f);
+      labelFeatures.push({
+        type: "Feature",
+        properties: {
+          label: f.properties.name === "sxm_border"
+            ? "Sint Maarten"
+            : "Anguilla",
+          color: "#FFFFFF"
+        },
+        geometry: centroid.geometry
+      });
+    });
+
+  const labelsGeoJSON = { type: "FeatureCollection", features: labelFeatures };
+  map.addSource('labels', { type: 'geojson', data: labelsGeoJSON });
+
+  map.addLayer({
+    id: 'labels-layer',
+    type: 'symbol',
+    source: 'labels',
+    layout: {
+      'text-field': ['get', 'label'],
+      'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+      'text-size': 14,
+      'text-offset': [0, 1.2]
+    },
+    paint: {
+      'text-color': ['get', 'color'],
+      'text-halo-color': '#000000',
+      'text-halo-width': 1
+    }
+  });
+});
+</script>
+</body>
+</html>
