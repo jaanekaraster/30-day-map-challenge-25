@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Bougie Map</title>
+<link
+  href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css"
+  rel="stylesheet"
+/>
+<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+  #menu { 
+    position:absolute;
+    top:20px;
+    right:20px;
+    background:white;
+    padding:10px;
+    z-index:999; 
+    font-family:sans-serif;
+    border-radius:10px;
+}
+
+/* Labels */
+#menu label { 
+    font-weight:bold; 
+    font-family: 'Helvetica', sans-serif;
+    font-size: 18px;
+}
+
+/* Sliders general */
+#menu input[type="range"] { 
+    width:100%; 
+    height: 10px;
+    border-radius: 5px;
+    -webkit-appearance: none;
+    margin-top:4px;
+    margin-bottom:4px;
+}
+
+/* Webkit (Chrome, Edge) Thumb */
+#menu input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: #000000;
+    border: none;
+    height: 30px;
+    width: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Firefox Thumb */
+#menu input[type="range"]::-moz-range-thumb {
+    background: #000000;
+    border: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Bougie Hex Slider Track Gradient */
+#hex-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #003300;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 30px;
+    text-align: center;
+    color: #003300;
+    position: relative;
+}
+
+/* Add emoji via ::after pseudo-element */
+#hex-slider::-webkit-slider-thumb::after {
+    content: "🌿";  /* Emoji inside the circle */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Firefox thumb */
+#hex-slider::-moz-range-thumb {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #003300;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 30px;
+    text-align: center;
+    color: #003300;
+}
+
+#title-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 14px 18px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.25);
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+    max-width: 500px;
+}
+#title-overlay h1 {
+    margin: 0;
+    font-size: 40px;
+}
+#title-overlay h3 {
+    margin: 6px 0 4px 0;
+    font-size: 20px;
+    font-weight: normal;
+}
+#title-overlay h4 {
+    margin: 6px 0 4px 0;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+a {
+    color: #0b9b2f;
+}
+
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="menu" style="width:320px;">
+  <div class="layer-control" style="background:#ffffff44; border-radius:8px;">
+    <label style="color:#000000; font-weight:bold; font-size:24px;">🍵🧘 Bougie Index</label><br/>
+    
+    <!-- Slider with gradient -->
+    <input type="range" id="hex-slider" min="0" max="5" value="0" step="0.1" style="
+    width:100%;
+    height:12px;
+    border-radius:6px;
+    background: linear-gradient(to right, #1b3a1b, #40ae40, #00FF00);
+    -webkit-appearance: none;
+    margin-top: 20px;
+    margin-bottom: 20px;
+"/>
+    
+    <!-- Scale labels -->
+    <div style="display:flex; justify-content:space-between; font-size:12px; color:#000000; margin-bottom:6px;">
+      <span style="font-size:18px;">Anywhere</span>
+      <span id="hex-value">0</span>
+      <span style="font-size:18px;">Only Hotspots</span>
+    </div>
+
+    <!-- <input id="hex-toggle" type="checkbox" checked/> Show Layer -->
+  </div>
+</div>
+
+
+
+
+
+</div>
+
+<div id="title-overlay" style="z-index:9999;">
+    <h1>"Bougie Score" for NYC</h1>
+    <h3>Mapping matcha cafes and boutique wellness in NYC</h3>
+    <h4 style="font-size: 16px;">By <a href="www.github.com/jaanekaraster/30-day-map-challenge-25">@jaanekaraster for the 30 Day Map Challenge, Day 14: OpenStreetMap</a></h4>
+    <h4 style="font-size: 14px;">Source: OpenStreetMap data</h4>
+</div>
+<script>
+const map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    center: [-74.0060, 40.7128],
+    zoom: 11
+});
+
+map.on("load", () => {
+
+    map.addSource("bougie_hex", {
+        type: "geojson",
+        data: "hex_bougie.geojson"
+    });
+
+    map.addLayer({
+        id: "bougie-hex-fill",
+        type: "fill",
+        source: "bougie_hex",
+        paint: {
+            "fill-color": [
+                "interpolate",
+                ["linear"],
+                ["get", "bougie_score"],
+                0,  "#1b3a1b",
+                1,  "#276227",
+                2,  "#338833",
+                3,  "#40ae40",
+                4,  "#4cd64c",
+                5,  "#00FF00"
+            ],
+            "fill-opacity": 0.55
+        }
+    });
+
+    map.addLayer({
+        id: "bougie-hex-outline",
+        type: "line",
+        source: "bougie_hex",
+        paint: {
+            "line-color": "#003300",
+            "line-width": 0.5
+        }
+    });
+
+    map.addSource("matcha_hex", {
+        type: "geojson",
+        data: "hex_matcha.geojson"
+    });
+
+    map.addLayer({
+        id: "matcha-hex-fill",
+        type: "fill",
+        source: "matcha_hex",
+        paint: {
+            "fill-color": [
+                "interpolate",
+                ["linear"],
+                ["get", "confidence_num"],
+                0,  "#1b3a1b",
+                1,  "#276227",
+                2,  "#338833",
+                3,  "#40ae40",
+                4,  "#4cd64c",
+                5,  "#00FF00"
+            ],
+            "fill-opacity": 0.55
+        }
+    });
+
+    map.addLayer({
+        id: "matcha-hex-outline",
+        type: "line",
+        source: "matcha_hex",
+        paint: {
+            "line-color": "#003300",
+            "line-width": 0.5
+        }
+    });
+
+    // -----------------------------
+    // TOGGLE LAYERS
+    // -----------------------------
+    function toggleLayer(id, checkbox) {
+        checkbox.addEventListener('change', function() {
+            map.setLayoutProperty(id, 'visibility', this.checked ? 'visible' : 'none');
+        });
+    }
+  
+    toggleLayer("bougie-hex-fill", document.getElementById("hex-toggle"));
+    toggleLayer("bougie-hex-outline", document.getElementById("hex-toggle"));
+
+    // -----------------------------
+    // FILTER SLIDERS
+    // -----------------------------
+    const confMap = ["low","medium","high"];
+
+    function setupSlider(sliderId, layerId, valueId, propName) {
+    const slider = document.getElementById(sliderId);
+    const valueSpan = document.getElementById(valueId);
+
+    slider.addEventListener('input', () => {
+        const val = parseFloat(slider.value);
+        valueSpan.textContent = val;
+        map.setFilter(layerId, [">=", ["get", propName], val]);
+    });
+}
+
+// Use numeric property for filtering
+setupSlider("hex-slider", "bougie-hex-fill", "hex-value", "bougie_score"); // already numeric
+
+
+});
+</script>
+
+</body>
+</html>
