@@ -23,8 +23,8 @@ There are so many ways to make maps! Methodologies below.
 | 10    | 🌀 **Air**   | Classical Elements 2/4: Focus on the atmmosphere. Map weather, wind patterns, air traffic, pollution, or airborne transmission (e.g., pollen, sound).        | [Flight of the Rosefinch](https://jaanekaraster.github.io/30-day-map-challenge-25/day10_air/index.html) |
 | 11    | 🐜 **Minimal Map**   | Challenge yourself to use the fewest possible elements (color, line weight, labels) while keeping the map clear, useful, and informative.        | [Principality of Hutt River](https://jaanekaraster.github.io/30-day-map-challenge-25/day11_minimal/day11.png) |
 | 12    | 🔮 **Map from 2125**   | How will maps look 100 years from now? Create a speculative map of what might be (or what you hope will be).        | [2025: Terraforming Titan](https://jaanekaraster.github.io/30-day-map-challenge-25/day12_2125/index.html) |
-| 13    | ⏰️ **10 Minute Map**   | Start the timer! The maximum allowed time to design and produce this map is 10 minutes. Focus on speed, simplicity, and core communication.        | [Title]() |
-| 14    | 📂 **OpenStreetMap**   | Use OpenStreetMap (OSM) data as your primary source. Map your favorite feature, contribute back to the project, or style the map in an interesting way.        | [Title]() |
+| 13    | ⏰️ **10 Minute Map**   | Start the timer! The maximum allowed time to design and produce this map is 10 minutes. Focus on speed, simplicity, and core communication.        | [Border Hopping in 10 Minutes](https://jaanekaraster.github.io/30-day-map-challenge-25/day13_10minutemap/index.html) |
+<!-- | 14    | 📂 **OpenStreetMap**   | Use OpenStreetMap (OSM) data as your primary source. Map your favorite feature, contribute back to the project, or style the map in an interesting way.        | [Title]() |
 | 15    | 🔥 **Fire**   | Classical Elements ¾: Focus on energy, light, or transformation. Map heat, wildfires, energy consumption, population density at night, or volcanic activity.        | [Title]() |
 | 16    | 🦠 **Cell**   | Map something composed of small, discrete units or networks. This could be a geographic cell (raster, tessellation), a cellular network, or a biological/social process (e.g., disease spread).        | [Title]() |
 | 17    | ✨ **A New Tool**   | Challenge Classic: Experimentation is key! Create your map using a software, language, library, or technique you have never used before.        | [Title]() |
@@ -57,4 +57,4 @@ There are so many ways to make maps! Methodologies below.
     height: 100%;
   }
 </style>
-
+ -->
