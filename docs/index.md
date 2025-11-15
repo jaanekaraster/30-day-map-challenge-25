@@ -1,3 +1,7 @@
+---
+layout: default
+title: My Site
+---
 # 30 Day Map Challenge 2025
 The 30 Day Map Challenge is an exciting opportunity to dive into the world of cartography, data visualization, and creative mapping! 
 
