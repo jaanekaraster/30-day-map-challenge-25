@@ -355,7 +355,7 @@ if (countryInput) {
 }
 
 document.getElementById("shareButton").addEventListener("click", async () => {
-    const shareUrl = "https://mylink.com/?ref=countrygame";
+    const shareUrl = "https://rebrand.ly/jkr30dmc25day19?utm_medium=share";
 
     if (navigator.share) {
         // Mobile + modern browsers
