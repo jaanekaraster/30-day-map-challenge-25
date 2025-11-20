@@ -33,9 +33,10 @@ footer {
 }
 
 
-a {
+.a {
     color: orange;
 }
+
 .header {
     display: flex;
     align-items: center;       /* vertically center icon + text */
