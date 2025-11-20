@@ -39,6 +39,7 @@ const playAgainBtn = document.getElementById("play-again-btn");
 // Circular timer UI pieces (must exist in HTML)
 const timerNumber = document.getElementById("timer-number");
 const timerProgress = document.getElementById("timer-progress");
+
 const timerEmoji = document.getElementById("timer-emoji");
 
 // ring length for radius = 35 (same as CSS)
@@ -217,24 +218,51 @@ function startTimer(seconds) {
     }, 1000);
 }
 
+function formatTime(seconds) {
+    return `0:${seconds.toString().padStart(2, "0")}`;
+}
+
 function updateTimerVisual() {
-    if (timerNumber) timerNumber.innerText = timeLeft;
+    const mobile = window.innerWidth <= 768;
+
+    if (timerNumber) timerNumber.innerText = formatTime(timeLeft);
+
+
     const fraction = timeLeft / Math.max(1, timerDuration);
+
+    if (mobile) {
+        // MOBILE BAR SHRINKS
+        const bar = document.getElementById("timer-bar-fill");
+
+        if (bar) {
+            bar.style.width = (fraction * 100) + "%";
+
+            // color changes
+            if (fraction > 0.5) {
+                bar.style.background = "#28a745"; // green
+            } else if (fraction > 0.25) {
+                bar.style.background = "#ffc107"; // yellow
+            } else {
+                bar.style.background = "#dc3545"; // red
+            }
+        }
+
+        return; // skip circular timer logic
+    }
+
+    // --- DESKTOP circular logic stays as is ---
     if (timerProgress) timerProgress.style.strokeDashoffset = RING_LENGTH * (1 - fraction);
 
     if (fraction > 0.5) {
-        if (timerProgress) timerProgress.style.stroke = "#28a745";
-        if (timerEmoji) timerEmoji.innerText = "⏳";
+        timerProgress.style.stroke = "#28a745";
+        timerEmoji.innerText = "⏳";
     } else if (fraction > 0.25) {
-        if (timerProgress) timerProgress.style.stroke = "#ffc107";
-        if (timerEmoji) timerEmoji.innerText = "⚠️";
+        timerProgress.style.stroke = "#ffc107";
+        timerEmoji.innerText = "⚠️";
     } else {
-        if (timerProgress) timerProgress.style.stroke = "#dc3545";
-        if (timerEmoji) timerEmoji.innerText = "⏰";
+        timerProgress.style.stroke = "#dc3545";
+        timerEmoji.innerText = "⏰";
     }
-
-    // Also update textual fallback
-    if (timerBox) timerBox.innerText = `⏱️ Time: ${timeLeft}s`;
 }
 
 function handleTimeExpired() {

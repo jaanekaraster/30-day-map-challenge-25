@@ -25,13 +25,15 @@
         <div id="top-bar">
             <div id="score">Score: 0</div>
         <div id="timer-wrapper">
-            <div id="timer-emoji"></div>
-            <svg id="timer-ring" width="80" height="80">
-                <circle id="timer-bg" cx="40" cy="40" r="35"></circle>
-                <circle id="timer-progress" cx="40" cy="40" r="35"></circle>
-            </svg>
-            <div id="timer-number">--</div>
-        </div>
+    <div id="timer-number"></div>
+
+    <div id="timer-bg">
+        <div id="timer-progress"></div>
+    </div>
+
+    <div id="timer-emoji"></div> <!-- desktop only -->
+</div>
+</div>
    
 
         </div>
@@ -50,7 +52,7 @@
         <!-- Guess Input Section -->
         <div id="guess-box">
             <div style="flex: 1; position: relative; margin-top: 1rem;">
-                <input type="text" id="countryInput" autocomplete="off" placeholder="Guess a country…">
+                <input type="text" id="countryInput" style="width:100%; font-size: 20px;" autocomplete="off" placeholder="Guess a country…">
                 <div id="countryDropdown" class="hidden"></div>
                 <div id="suggestions"></div>
             </div>
