@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTwist</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="day19_icon.png">
+
+</head>
+
+<body>
+
+<header class="header">
+    <img src="day19_icon.png" class="icon" alt="Icon">
+
+    <div class="title-block">
+        <h1>GeoTwist</h1>
+        <h2>Guess the Warped Country</h2>
+    </div>
+</header>
+    <main>
+
+        <!-- Score + Timer -->
+        <div id="top-bar">
+            <div id="score">Score: 0</div>
+        <div id="timer-wrapper">
+            <div id="timer-emoji"></div>
+            <svg id="timer-ring" width="80" height="80">
+                <circle id="timer-bg" cx="40" cy="40" r="35"></circle>
+                <circle id="timer-progress" cx="40" cy="40" r="35"></circle>
+            </svg>
+            <div id="timer-number">--</div>
+        </div>
+   
+
+        </div>
+
+        <!-- SVG container -->
+        <div id="map-container">
+            <svg id="country-svg" viewBox="0 0 1000 1000"></svg>
+        </div>
+        <div style="text-align:center;">
+            <p id="projection-label"></p>
+            <div id="projection-info"></div>
+
+</div>
+
+
+        <!-- Guess Input Section -->
+        <div id="guess-box">
+            <div style="flex: 1; position: relative; margin-top: 1rem;">
+                <input type="text" id="countryInput" autocomplete="off" placeholder="Guess a country…">
+                <div id="countryDropdown" class="hidden"></div>
+                <div id="suggestions"></div>
+            </div>
+
+            <button id="guess-btn" style="margin-left: 2rem; margin-top: 1rem;">Guess</button>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>By @jaanekaraster for 30 Day Map Challenge 2025, Day 19: Projection</p>
+        <p>Boundary data from <a href="https://www.naturalearthdata.com/">Natural Earth</a> via <a href="https://geojson-maps.kyd.au/">Ash Kyd</a></p>
+
+    </footer>
+
+    <!-- ============================
+         RESULT MODAL
+    ============================= -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+
+            <h2 id="modal-title">Result</h2>
+            <p id="modal-detail">The country was:</p>
+
+            <div id="modal-visuals">
+                <div class="visual-box">
+                    <h3>Warped Shape</h3>
+                    <div id="modal-warped" class="svg-box"></div>
+                    <p id="modal-warped-label"></p>
+                    <div id="projection-info" style="margin-top:6px;"></div>
+                    <div id="projection-info-modal"></div>
+                </div>
+
+                <div class="visual-box">
+                    <h3>Original Shape</h3>
+                    <div id="modal-original" class="svg-box"></div>
+                    <p id="modal-original-label"></p>
+                </div>
+            </div>
+            <div>
+                <h3>Too tough? Adjust the difficulty level</h3>
+            <!-- Settings -->
+            <div id="difficulty-container">
+                <div id="difficulty-container">
+                    <input type="radio" id="diff-easy"   name="difficulty" value="30">
+                    <label for="diff-easy">Easy (30s)</label>
+
+                    <input type="radio" id="diff-medium" name="difficulty" value="20" checked>
+                    <label for="diff-medium">Medium (20s)</label>
+
+                    <input type="radio" id="diff-hard"  name="difficulty" value="10">
+                    <label for="diff-hard">Hard (10s)</label>
+                </div>
+            </div>
+                        <button id="play-again-btn" class="modal-btn">Play Again</button>
+
+            <div>
+                </div>
+                <p id="modal-score" style="font-weight:600; font-size:1.2em; margin-top:10px;"></p>
+
+            <button id="shareButton" style="margin-top: 1rem;">Share</button>
+<div id="share-feedback" style="font-size:0.9em; color:green; margin-top:4px;"></div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Proj4 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+    <!-- Game Logic -->
+    <script src="script.js"></script>
+
+</body>
+</html>

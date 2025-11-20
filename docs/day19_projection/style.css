@@ -1,0 +1,450 @@
+/* =========================================
+   Base Layout
+========================================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background: #222;
+    color: white;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background: #222;
+    color: white;
+}
+
+.header {
+    display: flex;
+    align-items: center;       /* vertically center icon + text */
+    justify-content: center;   /* center the entire header on screen */
+    gap: 1rem;                  /* space between icon and text block */
+    margin-top: 0rem;
+}
+
+.icon {
+    width: 70px;               /* adjust size as desired */
+    height: auto;
+}
+
+.title-block {
+    display: flex;
+    flex-direction: column;
+    text-align: left;          /* left-align text */
+}
+
+/* reduce h1/h2 spacing */
+.title-block h1 {
+    margin: 0;
+}
+.title-block h2 {
+    margin: 0.2rem 0 0 0;      /* small top margin only */
+    font-weight: normal;
+}
+
+/* =========================================
+   Top Bar (Score + Timer)
+========================================= */
+#top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* =========================================
+   Map SVG Container
+========================================= */
+#map-container {
+    width: 100%;
+    height: 400px;
+    background: white;
+    border: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#country-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* =========================================
+   Guess Input + Button
+========================================= */
+#guess-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+
+}
+
+#guess-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#guess-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background: #21a10b;
+    color: white;
+    border-radius: 6px;
+    transition: 0.15s ease-in-out;
+}
+
+#guess-btn:hover {
+    background: #b7920c;
+}
+
+#guess-btn:active {
+    transform: scale(0.97);
+}
+
+#shareButton {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #951c81;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+    transition: 0.2s;
+}
+
+#shareButton:hover {
+    background: #ccaa00;
+}
+
+
+/* =========================================
+   Autocomplete Suggestions
+========================================= */
+#suggestions {
+    position: absolute;
+    width: calc(100% - 20px);
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+    z-index: 50;
+}
+
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: #eee;
+}
+
+#difficulty-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0 20px;
+}
+
+/* Hide radio */
+#difficulty-container input[type="radio"] {
+    display: none;
+}
+
+/* Base style for label buttons */
+#difficulty-container label {
+    padding: 8px 16px;
+    background: #e4e4e4;
+    color: #333;
+    border-radius: 20px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+/* Hover */
+#difficulty-container label:hover {
+    background: #d8d8d8;
+}
+
+/* Selected state */
+#difficulty-container input[type="radio"]:checked + label {
+    background: #4f8cff;
+    color: white;
+    border-color: #3a6fd4;
+    box-shadow: 0 0 6px rgba(79, 140, 255, 0.5);
+}
+
+
+/* =========================================
+   Settings Dropdown
+========================================= */
+#settings {
+    margin-top: 15px;
+}
+
+/* =========================================
+   Modal Overlay
+========================================= */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* =========================================
+   Modal Box
+========================================= */
+.modal-content {
+    background: #fff;
+    padding: 28px 32px;
+    border-radius: 16px;
+    width: 450px;
+    text-align: center;
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h2 {
+    margin: 0 0 10px;
+    font-size: 26px;
+}
+
+.modal-content p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* =========================================
+   Warped + Original Visuals
+========================================= */
+#modal-visuals {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.visual-box {
+    flex: 1;
+}
+
+.visual-box h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.svg-box {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+
+    background: #f3f3f3;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-outline {
+    fill: #4a90e2;
+    stroke: #1f3a93;
+    stroke-width: 2;
+}
+
+/* =========================================
+   Modal Button
+========================================= */
+.modal-btn {
+    margin-top: 22px;
+    padding: 10px 18px;
+    font-size: 16px;
+    border: none;
+    background: #1f6feb;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.15s ease-in-out;
+}
+
+.modal-btn:hover {
+    background: #155ac3;
+    transform: scale(1.03);
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+/* TIMER CONTAINER */
+/* TOP BAR LAYOUT */
+#top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* SCORE BADGE */
+#score {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #4f8cff, #6aa8ff);
+    color: white;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.5px;
+}
+
+/* TIMER WRAPPER – stay on right side */
+#timer-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+/* Timer emoji (top center) */
+#timer-emoji {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+}
+
+/* Timer ring base */
+#timer-bg {
+    fill: none;
+    stroke: #ddd;
+    stroke-width: 6;
+}
+
+/* Timer ring progress */
+#timer-progress {
+    fill: none;
+    stroke: #4f8cff;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 40px 40px;
+}
+
+/* Timer number (centered)*
+
+/* Number in center */
+#timer-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
+}
+
+/* Circular ring background */
+#timer-bg {
+    fill: none;
+    stroke: #ddd;
+    stroke-width: 6;
+}
+
+/* Progress ring that animates */
+#timer-progress {
+    fill: none;
+    stroke: #28a745; /* starts green */
+    stroke-width: 6;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    stroke-dasharray: 219.911; /* 2πr with r=35 */
+    stroke-dashoffset: 0;
+    transition: stroke 0.3s linear;
+}
+
+#countryInput {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+#countryDropdown {
+    position: absolute;      /* stays under input */
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;             /* BELOW the map layer */
+}
+
+#countryDropdown div {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+#countryDropdown div:hover {
+    background: #f0f0f0;
+}
+
+.hidden {
+    display: none;
+}
