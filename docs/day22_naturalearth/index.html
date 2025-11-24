@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>30DMC25 Day 22: Natural Earth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js",
+    "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+}
+
+/* Wrapper for scaling only interactive elements */
+#sceneWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: center center;
+}
+
+/* Three.js container */
+#container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+/* Circular viewport */
+#viewportMask {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 500px; height: 500px;
+  margin-left: -250px;
+  margin-top: -250px;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0000;
+  z-index: 10;
+}
+
+/* Zoom ring */
+#zoomRing {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 1000px; height: 1000px;
+  margin-left: -500px;
+  margin-top: -500px;
+  border-radius: 50%;
+  border: 3px solid #fafafa7c;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.6s ease;
+}
+
+#zoomRing span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  color: #333;
+  user-select: none;
+  background: white;
+  padding: 4px 6px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+#zoom1  { top: 50%; left: 0%; color:#fff; }
+#zoom100 { top: 0%; left: 50%; color: lightgreen; }
+#zoom500 { top: 50%; left: 100%; }
+
+/* Pointer */
+#pointer {
+  position: absolute;
+  top: 47%; left: 10%;
+  width: 0; height: 0;
+  border-left: 60px solid transparent;
+  border-right: 60px solid transparent;
+  border-bottom: 90px solid rgb(210,28,28);
+  transform: rotate(90deg);
+  z-index: 25;
+  transition: transform 0.6s ease;
+}
+
+/* Title and captions (not scaled) */
+#title {
+  position: absolute;
+  top: 20px; left: 20px;
+  font-size: 28px;
+  font-family: 'Press Start 2P', monospace;
+  color: #00a6ff;
+  text-shadow: 0 0 20px #ddf1f3;
+  pointer-events: none;
+  z-index: 999;
+}
+
+#subtitle {
+  position: absolute;
+  top: 60px; left: 20px;
+  font-size: 18px;
+  font-family: 'Press Start 2P', monospace;
+  color: #a0e0ff;
+  text-shadow: 0 0 8px #7ecfff;
+  pointer-events: none;
+  z-index: 998;
+}
+
+#caption {
+  position: absolute;
+  bottom: 2rem; left: 20px;
+  font-size: 12px;
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffffaa;
+  text-shadow: 0 0 4px #00000066;
+  pointer-events: none;
+  z-index: 997;
+}
+
+#caption a { color: #00ffffcc; text-decoration: underline; }
+
+/* Legend (not scaled) */
+#continentLegend {
+  position: absolute;
+  bottom: 60px;
+  right: 60px;
+  background: rgba(20,20,20,0.8);
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: white;
+  z-index: 50;
+}
+
+#continentLegend .legendItem { display: flex; align-items: center; margin-bottom: 6px; }
+#continentLegend .colorBox { width: 16px; height: 16px; margin-right: 8px; border-radius: 3px; border: 1px solid #fff3; }
+
+/* RESPONSIVE SCALING ONLY FOR SCENE */
+@media (max-width: 1200px) { #sceneWrapper { transform: scale(1); } }
+@media (max-width: 768px)  { #sceneWrapper { transform: scale(1); } #pointer { display: none; } }
+@media (max-width: 480px)  { #sceneWrapper { transform: scale(1); } }
+
+</style>
+</head>
+
+<body>
+
+<div id="title">Earth Under the Lens</div>
+<div id="subtitle">Observing the Earth's physical features at "micro" scale</div>
+<div id="caption">By @jaanekaraster for 30 Day Map Challenge, Day 22: Natural Earth | Data: <a href="https://www.naturalearthdata.com/downloads/110m-physical-vectors/">Natural Earth</a></div>
+<div id="continentLegend"></div>
+
+<!-- WRAPPER FOR SCALING -->
+<div id="sceneWrapper">
+  <div id="container"></div>
+  <div id="viewportMask"></div>
+  <div id="pointer"></div>
+
+  <div id="zoomRing">
+    <span id="zoom1">1x</span>
+    <span id="zoom100">100x</span>
+    <span id="zoom500">500x</span>
+  </div>
+</div>
+
+<script>
+const zoomRing = document.getElementById('zoomRing');
+const positions = { zoom1: 0, zoom100: -90, zoom500: 180 };
+
+function rotateRing(id) {
+  const deg = positions[id] || 0;
+  zoomRing.style.transform = `rotate(${deg}deg)`;
+  console.log('Zoom selected:', id);
+}
+
+document.getElementById('zoom1').addEventListener('click', () => rotateRing('zoom1'));
+document.getElementById('zoom100').addEventListener('click', () => rotateRing('zoom100'));
+document.getElementById('zoom500').addEventListener('click', () => rotateRing('zoom500'));
+</script>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
