@@ -1,0 +1,76 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* TITLE */
+#title {
+    text-align: center;
+    font-size: 28px;
+    padding: 20px 0 10px;
+    color: #ffea00;
+    text-shadow: 0 0 8px #ffe100;
+}
+
+/* SCOREBOARD */
+#scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+
+    background: rgba(0, 0, 0, 0.4);
+    color: #ffea00;
+    border: 3px solid #ffe100;
+    border-radius: 10px;
+
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+
+    box-shadow: 0 0 15px rgba(255, 234, 0, 0.7);
+    z-index: 10;
+}
+
+/* CREDITS FOOTER */
+#credits {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-size: 14px;
+    color: #ffea00;
+    text-shadow: 0 0 5px #ffe100;
+    pointer-events: none;
+}
+
+/* RESPONSIVE CANVAS WITH FIXED ASPECT RATIO (16:9) */
+#gameCanvas {
+    position: absolute;
+    top: 140px;             /* space for title + scoreboard */
+    bottom: 40px;           /* space for credits */
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* Available height */
+    height: calc(100% - 180px);
+
+    /* Maintain aspect ratio: width calculated from height */
+    width: calc((100% - 180px) * (16 / 9));
+
+    /* Prevent overflow if width is too big */
+    max-width: 80%;
+    max-height: calc(100% - 180px);
+
+    background: #0b0b0b;
+    border: 2px solid #444;
+    box-sizing: border-box;
+}
