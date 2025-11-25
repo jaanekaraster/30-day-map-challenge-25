@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>🦃 Turkey Around the World</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #eae6df; /* light turkey brown */
+      display: flex;
+      flex-direction: column;
+    }
+
+    #map {
+      flex: 1; /* fill remaining space */
+    }
+
+    /* Title box */
+    #title-box {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #88592b; /* turkey brown */
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    #title-box #title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    #title-box #subtitle {
+      font-size: 16px;
+      font-weight: normal;
+      opacity: 0.85;
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #222;
+      color: white;
+      font-size: 12px;
+    }
+
+    footer a {
+      color: orange;
+    }
+
+  </style>
+
+  <!-- OpenLayers -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
+
+</head>
+
+<body>
+  <div id="title-box">
+    <div id="title">🦃 Turkey Around the World</div>
+    <div id="subtitle">A journey of turkey names across languages</div>
+  </div>
+
+  <div id="map"></div>
+
+  <footer>
+    <p>By me for 30 Day Map Challenge 2025, Day 19: Projection</p>
+    <p>Turkey Names data from <a href="https://en.wikipedia.org/wiki/Turkey_(bird)">Wikipedia</a> | Country Borders from Natural Earth via <a href="https://geojson-maps.kyd.au/">Ash Kyd</a></p>
+  </footer>
+
+  <script>
+    fetch("countries_with_titles.geojson")
+      .then(response => response.json())
+      .then(geojson => {
+
+        const vectorSource = new ol.source.Vector({
+          features: new ol.format.GeoJSON().readFeatures(geojson, {
+            featureProjection: "EPSG:3857"
+          })
+        });
+
+        const turkeyColors = {
+          brown: "#804000",
+          gray: "#8c8c8c",
+          blue: "#1f78b4",
+          red: "#d73027"
+        };
+
+        const labelStyle = (feature, resolution) => {
+          const zoom = map.getView().getZoom();
+          if (zoom < 3.2) return null;
+
+          const text = feature.get("title_translit") || "";
+
+          return new ol.style.Style({
+            text: new ol.style.Text({
+              text: text,
+              font: "bold 14px 'Noto Sans', sans-serif",
+              fill: new ol.style.Fill({ color: turkeyColors.red }),
+              overflow: true
+            })
+          });
+        };
+
+        const vectorLayer = new ol.layer.Vector({
+          source: vectorSource,
+          style: (feature, resolution) => labelStyle(feature, resolution),
+          declutter: true
+        });
+
+        const baseLayer = new ol.layer.Tile({
+          source: new ol.source.XYZ({
+            url: "https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png"
+          })
+        });
+
+        const map = new ol.Map({
+          target: 'map',
+          layers: [baseLayer, vectorLayer],
+          view: new ol.View({
+            center: ol.proj.fromLonLat([10, 20]),
+            zoom: 4
+          })
+        });
+
+        map.getView().on("change:resolution", () => {
+          vectorLayer.changed();
+        });
+      });
+  </script>
+</body>
+
+</html>
