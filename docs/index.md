@@ -5,13 +5,7 @@ title: My Site
 # 30 Day Map Challenge 2025
 The 30 Day Map Challenge is an exciting opportunity to dive into the world of cartography, data visualization, and creative mapping! 
 
-## This year's focus: Open Source and AI
-
-There are so many ways to make maps! Methodologies below.
-
 ### Challenge Themes
-
-#### Upcoming Maps
 
 | Day  | Theme     | Description             | Topic |
 |------|------------|-------------------|-----------|
@@ -32,3 +26,18 @@ There are so many ways to make maps! Methodologies below.
 | 15    | 🔥 **Fire**   | Classical Elements ¾: Focus on energy, light, or transformation. Map heat, wildfires, energy consumption, population density at night, or volcanic activity.        | [Western Cape Fires, Jan-Feb 2024](https://jaanekaraster.github.io/30-day-map-challenge-25/day15_fire/day15.mp4) |
 | 16    | 🦠 **Cell**   | Map something composed of small, discrete units or networks. This could be a geographic cell (raster, tessellation), a cellular network, or a biological/social process (e.g., disease spread).        | [Singapore: Urban Cellscape](https://jaanekaraster.github.io/30-day-map-challenge-25/day16_cell/day16.png) [Video](https://jaanekaraster.github.io/30-day-map-challenge-25/day16_cell/day16.mp4)|
 | 17    | ✨ **A New Tool**   | Challenge Classic: Experimentation is key! Create your map using a software, language, library, or technique you have never used before.        | [Global Travels, Local Eats: Anthony Bourdain's Travel Map](https://jaanekaraster.github.io/day17_anewtool/day17.png) |
+| 18    | 🧭 **Out Of This World**   | Map something non-Earth: a fantasy realm, an exoplanet, the Moon, Mars, deep space, or a purely conceptual place (e.g., a mental map).       | [The Isle of Fincayra](https://jaanekaraster.github.io/day18_outofthisworld/day18.mp4) |
+| 19    | 🌐 **Projections**   | (GIS Day) Focus entirely on map projections. Choose an unusual or misunderstood projection to highlight a theme, or visualize distortion. (See xkcd.com/977)        | [GeoTwist: Guess the Warped Country](https://jaanekaraster.github.io/day19_projection/index.html) |
+| 20    | 🌊 **Water**   | Classical Elements 4/4: Focus on the fluid. Map hydrology, oceans, currents, water accessibility, sea level rise, precipitation, or anything aquatic.        |[Great Salt Lake, 1984-2021](https://jaanekaraster.github.io/day20_water/day20.mp4) |
+| 21    | 🔼 **Icons**   | Create a map where icons, pictograms, or custom symbols are the main focus. Use them to highlight points of interest or replace traditional cartographic features.        | [Urban Pac-Man](https://jaanekaraster.github.io/day21_icons/index.html) |
+| 22    | ⛰️ **Natural Earth**   | Use the Natural Earth dataset as your primary source for a visually stunning small-scale world or continent map.        | [Earth Under the Lens](https://jaanekaraster.github.io/day22_naturalearth/index.html) |
+| 23    | 🪜 **Process**   | Show how you make a map. This could be a tutorial, a step-by-step graphic, a blog post, a video, or a screenshot of your work environment. Combine it with a map from another day!       | [Portolan Chart Compass Rose](https://jaanekaraster.github.io/day23_process/day23.mp4) |
+| 24    | 🪧 **Places And Their Names**   | Focus on toponymy (place names). Experiment with font choices, label placement, typography, multiple languages, or the history and meaning behind a name.        | [Turkey Around the World](https://jaanekaraster.github.io/day24_places/index.html) |
+
+### Upcoming Maps
+25: Hexagons
+26: Transport
+27: Boundaries
+28: Black
+29: Raster
+30: Makeover
