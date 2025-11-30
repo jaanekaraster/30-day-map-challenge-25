@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>US Puzzle — Drag & Snap</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  html, body { margin:0; padding:0; height:100%; background:#0f1720; font-family:Inter,sans-serif; overflow:hidden; }
+  #titleContainer { width:100%; padding:8px 12px; color:#cfeee1; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; }
+  #titleContainer .title-left { flex:1; }
+  #titleContainer .title-center { flex:1; text-align:center; }
+  #titleContainer .title-right { flex:1; }
+  #titleContainer div { line-height:1.2; }
+  #titleContainer .title { font-size:22px; font-weight:600; margin-top: 0.5rem; margin-bottom:0.7rem; }
+  #titleContainer .subtitle { font-size:14px; margin-bottom: 0.5rem;}
+  #titleContainer .match-counter { font-size:20px; font-weight:600; color:#ffff00; text-shadow: 0 0 10px rgba(255,255,0,0.5); }
+  svg#puzzleBoard { width:100vw; height:calc(100vh - 100px); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)); display:block; }
+  .state-outline { opacity:0.6; pointer-events:none; }
+  .state-piece { cursor:grab; opacity:0.8; }
+  .neon-outline { fill:none; stroke:#ff00ff; stroke-width:2; pointer-events:none; }
+  .success-outline { fill:none; stroke:#00ff00; stroke-width:4; pointer-events:none; filter: drop-shadow(0 0 8px #00ff00); }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  
+  .fade-out {
+    animation: fadeOut 2s ease-out forwards;
+  }
+  
+  .victory-glow {
+    animation: victoryPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes victoryPulse {
+    0%, 100% { opacity: 0.3; filter: drop-shadow(0 0 5px #ffff00); }
+    50% { opacity: 1; filter: drop-shadow(0 0 20px #ffff00); }
+  }
+  
+  #victoryModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.5s ease-out;
+  }
+  
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  #victoryModal.show {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: linear-gradient(135deg, #1a2332 0%, #0f1720 100%);
+    border: 3px solid #ffff00;
+    border-radius: 16px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 255, 0, 0.5);
+    animation: modalSlideIn 0.5s ease-out;
+    max-width: 500px;
+  }
+  
+  @keyframes modalSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .modal-content h1 {
+    color: #ffff00;
+    font-size: 32px;
+    margin: 0 0 20px 0;
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+  }
+  
+  .modal-content p {
+    color: #cfeee1;
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0 0 30px 0;
+  }
+  
+  .share-button {
+    background: linear-gradient(135deg, #ffff00 0%, #ffd700 100%);
+    color: #0f1720;
+    border: none;
+    padding: 14px 40px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 255, 0, 0.3);
+  }
+  
+  .share-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 0, 0.5);
+  }
+  
+  .share-button:active {
+    transform: translateY(0);
+  }
+
+  .captionContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 32, 0.8); /* optional semi-transparent background */
+  display: flex;
+  justify-content: center; /* center the text horizontally */
+  align-items: center;
+  z-index: 500;
+}
+
+.captionContainer .caption {
+  font-size: 12px;
+  color: #cfeee1;
+}
+</style>
+</head>
+<body>
+
+<div id="titleContainer">
+  <div class="title-left">
+    <div class="title">US Puzzle Challenge</div>
+    <div class="subtitle">Solve the puzzle to unite the contiguous 48 states!</div>
+  </div>
+  <div class="title-center">
+    <div class="match-counter">Matched: <span id="matchCounter">0/48</span></div>
+  </div>
+  <div class="title-right"></div>
+</div>
+
+<div class="captionContainer">
+<div class="caption">By @jaanekaraster for 30 Day Map Challenge 2025, Day 30: Makeover | Data: <a href="https://davidrumsey.oldmapsonline.org/maps/90d01b44-4307-57e7-991d-fe33ffe289a9/">David Rumsey Map Collection</a></div>
+</div>
+
+<div id="victoryModal">
+  <div class="modal-content">
+    <h1>🎉 Congratulations! 🎉</h1>
+    <p>You united the 48 contiguous states of the USA!</p>
+    <button class="share-button" onclick="shareVictory()">Share Your Victory</button>
+  </div>
+</div>
+
+<svg id="puzzleBoard" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="transparent"></rect>
+</svg>
+
+<script>
+(async function(){
+  const LAYOUT_PATH = "us_puzzle_layout.json";
+  const boardEl = document.getElementById("puzzleBoard");
+  const SKIP_STATES = new Set(["Alaska","Hawaii"]);
+
+  const resp = await fetch(LAYOUT_PATH);
+  const layout = await resp.json();
+  const states = Object.entries(layout).filter(([name]) => !SKIP_STATES.has(name));
+  
+  // Don't count DC in the total
+  const totalStates = states.length - 1; // Subtract DC
+  let matchedCount = 0; // Start at 0, DC doesn't count
+
+  function updateMatchCounter() {
+    const counter = document.getElementById('matchCounter');
+    counter.textContent = `${matchedCount}/${totalStates}`;
+    
+    // Add a little pulse animation on update
+    counter.style.transition = 'none';
+    counter.style.transform = 'scale(1.3)';
+    counter.style.color = '#00ff00';
+    
+    setTimeout(() => {
+      counter.style.transition = 'all 0.3s ease';
+      counter.style.transform = 'scale(1)';
+      counter.style.color = '#ffff00';
+    }, 100);
+  }
+  
+  // Initialize counter
+  updateMatchCounter();
+
+  // Compute bounding box
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  states.forEach(([_, s])=>{
+    minX = Math.min(minX, s.minx);
+    minY = Math.min(minY, s.miny);
+    maxX = Math.max(maxX, s.maxx);
+    maxY = Math.max(maxY, s.maxy);
+  });
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight - 60;
+  const scaleX = vw / (maxX - minX);
+  const scaleY = vh / (maxY - minY);
+  const scale = Math.min(scaleX, scaleY);
+
+  const boardWidth = (maxX - minX) * scale;
+  const boardHeight = (maxY - minY) * scale;
+  boardEl.setAttribute("width", boardWidth);
+  boardEl.setAttribute("height", boardHeight);
+  boardEl.setAttribute("viewBox", `0 0 ${boardWidth} ${boardHeight}`);
+
+  // Render static state outlines
+  states.forEach(([name, s])=>{
+    const x = (s.minx - minX) * scale;
+    const y = (s.miny - minY) * scale;
+    const w = s.width * scale;
+    const h = s.height * scale;
+
+    const outline = document.createElementNS("http://www.w3.org/2000/svg","image");
+    outline.setAttribute("href", s.svg);
+    outline.setAttribute("x", x);
+    outline.setAttribute("y", y);
+    outline.setAttribute("width", w);
+    outline.setAttribute("height", h);
+    outline.setAttribute("class","state-outline");
+    boardEl.appendChild(outline);
+  });
+
+  async function fetchInlineSVG(url){
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(text, "image/svg+xml");
+    return svgDoc.querySelector("svg");
+  }
+
+  // Draggable pieces
+  for(const [name, s] of states){
+    const w = s.width * scale;
+    const h = s.height * scale;
+    let x, y;
+
+    if(name === "DistrictofColumbia"){
+      const s_outline = boardEl.querySelector(`.state-outline[href$="${name}.svg"]`);
+      x = parseFloat(s_outline.getAttribute("x"));
+      y = parseFloat(s_outline.getAttribute("y"));
+    } else {
+      const edge = Math.floor(Math.random()*4);
+      switch(edge){
+        case 0: x=Math.random()*(boardWidth-w); y=0; break;
+        case 1: x=Math.random()*(boardWidth-w); y=boardHeight-h; break;
+        case 2: x=0; y=Math.random()*(boardHeight-h); break;
+        case 3: x=boardWidth-w; y=Math.random()*(boardHeight-h); break;
+      }
+    }
+
+    const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("data-name", name);
+
+    // PNG image
+    const img = document.createElementNS("http://www.w3.org/2000/svg","image");
+    img.setAttribute("href", `states_png/NAME_1_${name}.png`);
+    img.setAttribute("x", x);
+    img.setAttribute("y", y);
+    img.setAttribute("width", w);
+    img.setAttribute("height", h);
+    img.style.opacity = (name === "DistrictofColumbia") ? 1.0 : 0.8;
+    g.appendChild(img);
+
+    if(name !== "DistrictofColumbia"){
+      const svgContent = await fetchInlineSVG(s.svg);
+      
+      // Get the original SVG dimensions
+      const viewBox = svgContent.getAttribute('viewBox');
+      let vbX, vbY, vbW, vbH;
+      
+      if(viewBox) {
+        [vbX, vbY, vbW, vbH] = viewBox.split(' ').map(Number);
+      } else {
+        // Fallback: use the width/height attributes or bbox from layout
+        vbW = parseFloat(svgContent.getAttribute('width')) || s.width;
+        vbH = parseFloat(svgContent.getAttribute('height')) || s.height;
+        vbX = 0;
+        vbY = 0;
+      }
+      
+      const neonGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
+      neonGroup.setAttribute("class","neon-outline");
+      
+      // Critical fix: scale to match the piece size
+      const scaleXLocal = w / vbW;
+      const scaleYLocal = h / vbH;
+      neonGroup.setAttribute("transform", 
+        `translate(${x},${y}) translate(${-vbX * scaleXLocal},${-vbY * scaleYLocal}) scale(${scaleXLocal},${scaleYLocal})`
+      );
+
+      // Copy shapes
+      const shapes = svgContent.querySelectorAll("path, polygon, polyline, circle, rect, ellipse");
+      shapes.forEach(shape=>{
+        const clone = shape.cloneNode(true);
+        clone.removeAttribute("fill");
+        clone.setAttribute("fill","none");
+        clone.setAttribute("stroke","#ff00ff");
+        clone.setAttribute("stroke-width", 3 / Math.min(scaleXLocal, scaleYLocal));
+        clone.setAttribute("vector-effect", "non-scaling-stroke");
+        neonGroup.appendChild(clone);
+      });
+
+      g.appendChild(neonGroup);
+      
+      // Store original transform for updates during drag
+      g.setAttribute("data-base-transform", 
+        `translate(${-vbX * scaleXLocal},${-vbY * scaleYLocal}) scale(${scaleXLocal},${scaleYLocal})`
+      );
+      
+      // Store SVG content for success effect
+      g.setAttribute("data-svg-shapes", JSON.stringify(
+        Array.from(shapes).map(shape => shape.outerHTML)
+      ));
+      g.setAttribute("data-scale-x", scaleXLocal);
+      g.setAttribute("data-scale-y", scaleYLocal);
+      g.setAttribute("data-vb-x", vbX);
+      g.setAttribute("data-vb-y", vbY);
+    }
+
+    boardEl.appendChild(g);
+
+    if(name !== "DistrictofColumbia"){
+      let offsetX=0, offsetY=0, isDragging=false;
+      g.addEventListener("mousedown", e=>{
+        isDragging=true;
+        offsetX = e.clientX - parseFloat(img.getAttribute("x"));
+        offsetY = e.clientY - parseFloat(img.getAttribute("y"));
+        boardEl.appendChild(g);
+      });
+      window.addEventListener("mousemove", e=>{
+        if(!isDragging) return;
+        const newX = e.clientX - offsetX;
+        const newY = e.clientY - offsetY;
+        img.setAttribute("x", newX);
+        img.setAttribute("y", newY);
+        const neon = g.querySelector(".neon-outline");
+        if(neon){ 
+          const baseTransform = g.getAttribute("data-base-transform");
+          neon.setAttribute("transform", `translate(${newX},${newY}) ${baseTransform}`); 
+        }
+      });
+      window.addEventListener("mouseup", e=>{
+        if(isDragging){
+          isDragging=false;
+          const s_outline = boardEl.querySelector(`.state-outline[href$="${name}.svg"]`);
+          const dx = parseFloat(img.getAttribute("x")) - parseFloat(s_outline.getAttribute("x"));
+          const dy = parseFloat(img.getAttribute("y")) - parseFloat(s_outline.getAttribute("y"));
+          const snapDist = 20;
+          if(Math.abs(dx)<snapDist && Math.abs(dy)<snapDist){
+            const finalX = parseFloat(s_outline.getAttribute("x"));
+            const finalY = parseFloat(s_outline.getAttribute("y"));
+            
+            img.setAttribute("x", finalX);
+            img.setAttribute("y", finalY);
+            
+            // Remove pink outline
+            const neon = g.querySelector(".neon-outline");
+            if(neon) g.removeChild(neon);
+            
+            // Create bright green success outline
+            const successGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
+            successGroup.setAttribute("class","success-outline");
+            
+            const baseTransform = g.getAttribute("data-base-transform");
+            successGroup.setAttribute("transform", `translate(${finalX},${finalY}) ${baseTransform}`);
+            
+            // Recreate shapes in green
+            const shapesData = JSON.parse(g.getAttribute("data-svg-shapes"));
+            const scaleXLocal = parseFloat(g.getAttribute("data-scale-x"));
+            const scaleYLocal = parseFloat(g.getAttribute("data-scale-y"));
+            
+            shapesData.forEach(shapeHTML => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(shapeHTML, "image/svg+xml");
+              const shape = doc.documentElement;
+              shape.removeAttribute("fill");
+              shape.setAttribute("fill","none");
+              shape.setAttribute("stroke","#00ff00");
+              shape.setAttribute("stroke-width", 4 / Math.min(scaleXLocal, scaleYLocal));
+              shape.setAttribute("vector-effect", "non-scaling-stroke");
+              successGroup.appendChild(shape);
+            });
+            
+            g.appendChild(successGroup);
+            
+            // Fade out after a moment
+            setTimeout(() => {
+              successGroup.classList.add('fade-out');
+              setTimeout(() => {
+                if(successGroup.parentNode) {
+                  g.removeChild(successGroup);
+                }
+              }, 2000); // Match animation duration
+            }, 500); // Brief pause before fading
+            
+            img.style.pointerEvents="none";
+            img.style.opacity=1.0;
+            g.setAttribute("data-matched", "true");
+            
+            // Update match counter (only for non-DC states)
+            if(name !== "DistrictofColumbia") {
+              matchedCount++;
+              updateMatchCounter();
+            }
+            
+            // Kansas Easter Egg
+            if(name === "Kansas") {
+            const eggText = document.createElementNS("http://www.w3.org/2000/svg","text");
+            eggText.setAttribute("x", boardWidth / 2);
+            eggText.setAttribute("y", boardHeight / 2);
+            eggText.setAttribute("text-anchor", "middle");
+            eggText.setAttribute("dominant-baseline", "middle");
+            eggText.setAttribute("fill", "#ffdd00");
+            eggText.setAttribute("font-size", "48");
+            eggText.setAttribute("font-family", "Inter,sans-serif");
+            eggText.setAttribute("opacity", "1");
+            eggText.setAttribute("style", "pointer-events:none; text-shadow: 0 0 10px #ffff00;");
+            eggText.textContent = "There's no place like home";
+            boardEl.appendChild(eggText);
+
+            // Animate fade out
+            eggText.animate([
+                { opacity: 1, transform: "scale(1)" },
+                { opacity: 0, transform: "scale(1.2)" }
+            ], { duration: 3000, easing: "ease-out" });
+
+            setTimeout(() => {
+                if(eggText.parentNode) boardEl.removeChild(eggText);
+            }, 3000);
+            }
+
+            
+            // Move matched piece behind unmatched pieces
+            // Insert it after the last state-outline but before unmatched pieces
+            const allGroups = Array.from(boardEl.querySelectorAll('g[data-name]'));
+            const firstUnmatched = allGroups.find(group => !group.getAttribute("data-matched"));
+            if(firstUnmatched) {
+              boardEl.insertBefore(g, firstUnmatched);
+            }
+            
+            checkCompletion();
+          }
+        }
+      });
+    }
+  }
+
+  function checkCompletion(){
+    const remaining = boardEl.querySelectorAll('g[data-name]:not([data-matched="true"])');
+    if(remaining.length === 0){
+      celebrateVictory();
+    }
+  }
+  
+  function celebrateVictory() {
+    console.log('🎉 Victory! Celebrating...');
+    
+    // Add yellow glow to all state outlines
+    const allOutlines = boardEl.querySelectorAll('.state-outline');
+    console.log('Adding victory glow to', allOutlines.length, 'outlines');
+    allOutlines.forEach(outline => {
+      outline.classList.add('victory-glow');
+      // Force stroke to be visible
+      outline.style.stroke = '#ffff00';
+      outline.style.strokeWidth = '3';
+    });
+    
+    // Show victory modal after brief delay
+    setTimeout(() => {
+      console.log('Showing victory modal');
+      document.getElementById('victoryModal').classList.add('show');
+    }, 1000);
+    
+    // Enable pan/zoom
+    enablePanZoom();
+  }
+  
+  function shareVictory() {
+    const shareUrl = 'https://www.mylink.com';
+    
+    // Try native share API first (mobile)
+    if (navigator.share) {
+      navigator.share({
+        title: 'US Puzzle Challenge',
+        text: 'I just completed the US Puzzle Challenge! Can you unite all 48 states?',
+        url: shareUrl
+      }).catch(() => {
+        // Fallback to clipboard if share fails
+        copyToClipboard(shareUrl);
+      });
+    } else {
+      // Fallback to clipboard
+      copyToClipboard(shareUrl);
+    }
+  }
+  
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      // Visual feedback
+      const button = document.querySelector('.share-button');
+      const originalText = button.textContent;
+      button.textContent = '✓ Link Copied!';
+      button.style.background = 'linear-gradient(135deg, #00ff00 0%, #00dd00 100%)';
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.background = 'linear-gradient(135deg, #ffff00 0%, #ffd700 100%)';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      alert('Share link: ' + text);
+    });
+  }
+
+  function enablePanZoom(){
+    let viewX=0, viewY=0, scale=1;
+    let isPanning=false, startX=0, startY=0;
+    boardEl.addEventListener("mousedown", e=>{
+      isPanning=true; startX=e.clientX; startY=e.clientY;
+    });
+    window.addEventListener("mousemove", e=>{
+      if(!isPanning) return;
+      const dx = (startX - e.clientX)/scale;
+      const dy = (startY - e.clientY)/scale;
+      viewX += dx; viewY += dy;
+      boardEl.setAttribute("viewBox", `${viewX} ${viewY} ${boardWidth/scale} ${boardHeight/scale}`);
+      startX = e.clientX; startY = e.clientY;
+    });
+    window.addEventListener("mouseup", e=>{ isPanning=false; });
+    boardEl.addEventListener("wheel", e=>{
+      e.preventDefault();
+      const delta = -e.deltaY*0.001;
+      scale *= (1+delta);
+      scale = Math.max(0.5, Math.min(5, scale));
+      boardEl.setAttribute("viewBox", `${viewX} ${viewY} ${boardWidth/scale} ${boardHeight/scale}`);
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
