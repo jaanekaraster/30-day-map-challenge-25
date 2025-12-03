@@ -1,4 +1,10 @@
-theme: jekyll-theme-minimal
-markdown: kramdown
-title: Your Site Title
-description: Your site description
+# theme: jekyll-theme-minimal
+# markdown: kramdown
+# title: Your Site Title
+# description: Your site description
+
+title: "My 30-Day Map Challenge"
+description: "Daily maps for 2025 by @jaanekaraster"
+#theme: jekyll-theme-minimal  # Or any other Jekyll theme name
+#theme: jekyll-theme-cayman
+theme: jekyll-theme-slate
