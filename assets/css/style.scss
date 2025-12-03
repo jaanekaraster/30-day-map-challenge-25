@@ -1,0 +1,39 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+body {
+  font-family: "Inter", sans-serif;
+  font-size: 17px;
+  color: #eaeaea;
+}
+#sidebar {
+  background: #0f172a;
+}
+
+#sidebar h1,
+#sidebar h2,
+#sidebar h3 {
+  color: #fff;
+}
+#main {
+  max-width: 960px;
+}
+:root {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background: #1e293b;
+  color: #fff;
+}
