@@ -1,7 +1,5 @@
----
-layout: default
-title: My Site
----
+![header image](https://jaanekaraster.github.io/30-day-map-challenge-25/2025_all.png)
+
 # 30 Day Map Challenge 2025
 The 30 Day Map Challenge is an exciting opportunity to dive into the world of cartography, data visualization, and creative mapping! 
 
